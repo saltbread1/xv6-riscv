@@ -54,7 +54,6 @@ int make_uthread(void (*fun)())
         {
             t->tid = tnum++;
             t->state = UT_RUNNABLE;
-            //memset(&t->context, 0, sizeof(t->context));
             t->context.ra = (uint64)fun;
             t->context.sp = (uint64)(t->stack + STACK_DEPTH);
             t->fun = fun;

@@ -42,6 +42,8 @@ void swtch(struct context*, struct context*);
 struct uthread threads[MAX_THREAD];
 struct uthread *curr_thread;
 int tnum;
+struct context scontext;
+uint64 sstack[STACK_DEPTH];
 
 int make_uthread(void (*fun)())
 {
@@ -67,17 +69,19 @@ void start_uthreads()
 {
     curr_thread = threads;
     curr_thread->state = UT_RUNNING;
-    curr_thread->fun();
+
+    //curr_thread->fun();
+    scontext.ra = (uint64)start_uthreads;
+    scontext.sp = (uint64)(sstack + STACK_DEPTH);
+    swtch(&scontext, &curr_thread->context);
 }
 
-void yield()
+// schedule
+// Not switch if there is only one thread.
+void sched()
 {
     struct uthread *t, *next_thread;
 
-    curr_thread->state = UT_RUNNABLE;
-
-    // schedule
-    // If there is only one thread, the same thread is selected.
     for (t = curr_thread + 1; t <= curr_thread + MAX_THREAD; t++)
     {
         next_thread = t;
@@ -94,9 +98,18 @@ void yield()
                 curr_thread = next_thread;
                 swtch(&t->context, &curr_thread->context);
             }
-            break;
+            return;
         }
     }
+
+    // There are no active thread.
+    swtch(&curr_thread->context, &scontext);
+}
+
+void yield()
+{
+    curr_thread->state = UT_RUNNABLE;
+    sched();
 }
 
 int mytid()
@@ -104,11 +117,18 @@ int mytid()
     return curr_thread->tid;
 }
 
+void uthread_exit()
+{
+    curr_thread->state = UT_EMPTY;
+    sched();
+}
+
 void foo() {
     int c = 0;
     for (;;) {
         printf("foo (tid=%d): %d\n", mytid(), c);
         c += 1;
+        if (c > 8) { uthread_exit(); }
         yield();
     }
 }
@@ -120,6 +140,7 @@ void bar() {
         printf("bar (tid=%d): %d\n", mytid(), c);
         yield();
         c += 2;
+        if (c > 12) { uthread_exit(); }
     }
 }
 
@@ -134,6 +155,7 @@ void baz() {
     for (;;) {
         baz_sub(&c);
         baz_sub(&c);
+        if (c > 15) { uthread_exit(); }
     }
 }
 
