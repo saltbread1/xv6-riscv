@@ -95,17 +95,13 @@ void yield()
     next_thread->state = UT_RUNNING;
     if (next_thread != curr_thread)
     {
-        swtch(&curr_thread->context, &next_thread->context);
+        t = curr_thread;
         curr_thread = next_thread;
+        swtch(&t->context, &curr_thread->context);
     }
 }
 
 int mytid()
 {
     return curr_thread->tid;
-}
-
-int main()
-{
-    exit(0);
 }

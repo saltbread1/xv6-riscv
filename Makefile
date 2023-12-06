@@ -106,13 +106,10 @@ $U/_forktest: $U/forktest.o $(ULIB)
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $U/_forktest $U/forktest.o $U/ulib.o $U/usys.o
 	$(OBJDUMP) -S $U/_forktest > $U/forktest.asm
 
-$U/_uthreads: $U/uthreads.o $(ULIB) $K/swtch.o
+$U/_uttest1: $U/uttest1.o $(ULIB) $K/swtch.o
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
 	$(OBJDUMP) -S $@ > $*.asm
 	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $*.sym
-
-#$U/_uttest1: $U/uttest1.c
-#	$(CC) $(CFLAGS) -o $U/uttest1.c $U/uthreads.c
 
 mkfs/mkfs: mkfs/mkfs.c $K/fs.h $K/param.h
 	gcc -Werror -Wall -I. -o mkfs/mkfs mkfs/mkfs.c
@@ -140,7 +137,6 @@ UPROGS=\
 	$U/_grind\
 	$U/_wc\
 	$U/_zombie\
-	$U/_uthreads\
 	$U/_uttest1\
 
 fs.img: mkfs/mkfs README $(UPROGS)
