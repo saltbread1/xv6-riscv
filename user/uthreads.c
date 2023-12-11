@@ -10,7 +10,8 @@
 #define UT_READY 2
 #define UT_SLEEP 3
 
-struct context {
+struct context
+{
     uint64 ra;
     uint64 sp;
 
