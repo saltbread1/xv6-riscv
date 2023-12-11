@@ -5,7 +5,7 @@
 
 #define MAX_THREAD 4
 #define STACK_DEPTH 512
-#define UT_EMPTY 0
+#define UT_UNUSED 0
 #define UT_RUNNING 1
 #define UT_READY 2
 #define UT_SLEEP 3
@@ -53,7 +53,7 @@ int make_uthread(void (*fun)())
 
     for (t = threads; t < threads + MAX_THREAD; t++)
     {
-        if (t->state == UT_EMPTY)
+        if (t->state == UT_UNUSED)
         {
             t->tid = tnum++;
             t->state = UT_READY;
@@ -105,7 +105,7 @@ void sched()
     for (t = threads; t < threads + MAX_THREAD; t++)
     {
         // There is at least one active thread.
-        if (t->state != UT_EMPTY)
+        if (t->state != UT_UNUSED)
         {
             return;
         }
@@ -128,7 +128,7 @@ int mytid()
 
 void uthread_exit()
 {
-    curr_thread->state = UT_EMPTY;
+    curr_thread->state = UT_UNUSED;
     sched();
 }
 
