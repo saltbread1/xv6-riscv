@@ -106,17 +106,22 @@ $U/_forktest: $U/forktest.o $(ULIB)
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $U/_forktest $U/forktest.o $U/ulib.o $U/usys.o
 	$(OBJDUMP) -S $U/_forktest > $U/forktest.asm
 
-$U/_uttest1: $U/uttest1.o $(ULIB) $K/swtch.o
+$U/_uttest1: $U/uttest1.o $U/uthreads.o $(ULIB) $K/swtch.o
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
 	$(OBJDUMP) -S $@ > $*.asm
 	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $*.sym
 
-$U/_uttest2: $U/uttest2.o $(ULIB) $K/swtch.o
+$U/_uttest1_2: $U/uttest1_2.o $U/uthreads.o $(ULIB) $K/swtch.o
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
 	$(OBJDUMP) -S $@ > $*.asm
 	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $*.sym
 
-$U/_uttest3: $U/uttest3.o $(ULIB) $K/swtch.o
+$U/_uttest2: $U/uttest2.o $U/uthreads.o $(ULIB) $K/swtch.o
+	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
+	$(OBJDUMP) -S $@ > $*.asm
+	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $*.sym
+
+$U/_uttest3: $U/uttest3.o $U/uthreads.o $(ULIB) $K/swtch.o
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
 	$(OBJDUMP) -S $@ > $*.asm
 	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $*.sym
@@ -148,6 +153,7 @@ UPROGS=\
 	$U/_wc\
 	$U/_zombie\
 	$U/_uttest1\
+	$U/_uttest1_2\
 	$U/_uttest2\
 	$U/_uttest3\
 

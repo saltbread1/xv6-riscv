@@ -3,14 +3,19 @@
 #include "user/user.h"
 #include "user/uthreads.h"
 
+int foo_sub(int c)
+{
+    yield();
+    if (c <= 0) { return 1; }
+    return c * foo_sub(c-1);
+}
+
 void foo()
 {
     int c = 0;
     for (;;)
     {
-        printf("foo (tid=%d): %d\n", mytid(), c);
-        c += 1;
-        if (c > 8) { uthread_exit(); }
+        printf("foo (tid=%d): %d\n", mytid(), foo_sub(c++));
         yield();
     }
 }
@@ -20,18 +25,20 @@ void bar()
     int c = 0;
     for (;;)
     {
-        printf("bar (tid=%d): %d\n", mytid(), c);
         yield();
         c += 2;
-        if (c > 12) { uthread_exit(); }
+        yield();
+        c += 3;
+        yield();
+        printf("bar (tid=%d): %d\n", mytid(), c);
     }
 }
 
-void baz_sub(int *cp)
+int baz_sub(int c)
 {
-    printf("baz (tid=%d): %d\n", mytid(), *cp);
     yield();
-    *cp += 3;
+    if (c <= 1) { return 1; }
+    return baz_sub(c-1) + baz_sub(c-2);
 }
 
 void baz()
@@ -39,14 +46,12 @@ void baz()
     int c = 0;
     for (;;)
     {
-        baz_sub(&c);
-        baz_sub(&c);
-        if (c > 15) { uthread_exit(); }
+        printf("baz (tid=%d): %d\n", mytid(), baz_sub(c++));
+        yield();
     }
 }
 
-int main()
-{
+int main() {
     make_uthread(foo);
     make_uthread(bar);
     make_uthread(baz);
