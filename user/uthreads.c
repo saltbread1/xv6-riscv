@@ -6,8 +6,8 @@
 #define MAX_THREAD 4
 #define STACK_DEPTH 512
 #define UT_EMPTY 0
-#define UT_RUNNABLE 1
-#define UT_RUNNING 2
+#define UT_RUNNING 1
+#define UT_READY 2
 #define UT_SLEEP 3
 
 struct context {
@@ -55,7 +55,7 @@ int make_uthread(void (*fun)())
         if (t->state == UT_EMPTY)
         {
             t->tid = tnum++;
-            t->state = UT_RUNNABLE;
+            t->state = UT_READY;
             t->context.ra = (uint64)fun;
             t->context.sp = (uint64)(t->stack + STACK_DEPTH);
             return t->tid;
@@ -88,7 +88,7 @@ void sched()
         {
             next_thread -= MAX_THREAD;
         }
-        if (next_thread->state == UT_RUNNABLE)
+        if (next_thread->state == UT_READY)
         {
             next_thread->state = UT_RUNNING;
             if (next_thread != curr_thread)
@@ -116,7 +116,7 @@ void sched()
 
 void yield()
 {
-    curr_thread->state = UT_RUNNABLE;
+    curr_thread->state = UT_READY;
     sched();
 }
 
@@ -147,7 +147,7 @@ void uthread_notify(int tid, void *a)
     {
         if (t->tid == tid && t->state == UT_SLEEP && t->a == a)
         {
-            t->state = UT_RUNNABLE;
+            t->state = UT_READY;
             break;
         }
     }
@@ -161,7 +161,7 @@ void uthread_notify_all(void *a)
     {
         if (t->state == UT_SLEEP && t->a == a)
         {
-            t->state = UT_RUNNABLE;
+            t->state = UT_READY;
         }
     }
 }
